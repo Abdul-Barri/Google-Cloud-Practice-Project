@@ -1,0 +1,145 @@
+Implementing Cloud SQL | Qwiklabs
+
+Overview
+In this lab, you configure a Cloud SQL server and learn how to connect an application to it via a proxy over an external connection. You also configure a connection over a Private IP link that offers performance and security benefits. The app we chose to demonstrate in this lab is Wordpress, but the information and best practices are applicable to any application that needs SQL Server.
+By the end of this lab, you will have 2 working instances of the Wordpress frontend connected over 2 different connection types to their SQL instance backend, as shown in this diagram:
+ 
+Objectives
+In this lab, you learn how to perform the following tasks:
+•	Create a Cloud SQL database
+•	Configure a virtual machine to run a proxy
+•	Create a connection between an application and Cloud SQL
+•	Connect an application to Cloud SQL using Private IP address
+
+Task 1: Create a Cloud SQL database
+
+In this task, you configure a SQL server according to Google Cloud best practices and create a Private IP connection.
+
+1.	In the Cloud Console, click on "Activate Cloud Shell". Alternatively, you can use the gcloud SDK terminal if you have it installed on your local machine. 
+
+2.	In the Cloud Shell Terminal, run the following commands:
+
+=>	gcloud beta sql instances create wordpress-db --tier=db-n1-standard-1 --region=us-central1 --network=default --database-version=MYSQL_5_7 --storage-type=SSD
+
+The above command creates an SQL instance with the name "wordpress-db". The machine type is "db-n1-standard-1" and region is "us-central1" with the database version set to "MYSQL_5_7". To enable Private IP address, the network was set to the "default" network.
+
+=>	gcloud sql users set-password root --host=% --instance [INSTANCE_NAME] --password [PASSWORD]
+
+The command above is used to set a password for the SQL instance created. Remember to replace the [INSTANCE_NAME] with the name of the SQL instance and [PASSWORD] with the password. Exampe;
+
+=>	gcloud sql users set-password root --host=% --instance wordpress-db --password sql_password
+
+Task 2: Configure a proxy on a virtual machine
+
+When your application does not reside in the same VPC connected network and region as your Cloud SQL instance, use a proxy to secure its external connection.
+In order to configure the proxy, you need the Cloud SQL instance connection name.
+The lab comes with 2 virtual machines preconfigured with Wordpress and its dependencies. You can view the startup script and service account access by clicking on a virtual machine name. Notice that we used the principle of least privilege and only allow SQL access for that VM. There's also a network tag and a firewall preconfigured to allow port 80 from any host. 
+
+1.	In the Cloud Shell Terminal, run the following command to SSH into the wordpress-europe-proxy VM instance:
+
+=>	gcloud compute ssh [VM_INSTANCE_NAME] --zone [VM_INSTANCE_ZONE]
+
+Remember to replace the [VM_INSTANCE_NAME] with the name of the VM instance and [VM_INSTANCE_ZONE] with the zone of the VM instance. Example;
+
+=>	gcloud compute ssh wordpress-europe-proxy --zone europe-west1-b
+
+2.	Download the Cloud SQL Proxy and make it executable:
+
+=>	wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy && chmod +x cloud_sql_proxy
+
+3.	To copy Instance connection name, referred to as [SQL_CONNECTION_NAME], run the following command in cloud shell:
+
+=>	gcloud sql instances describe wordpress-db
+
+4.	Note the Instance connection name in the result. This will be referred to as [SQL_CONNECTION_NAME]. 
+
+5.	Create the database "wordpress" using the following command:
+
+=>	gcloud sql databases create wordpress --instance wordpress-db
+
+6.	Return to the SSH window and save the connection name in an environment variable, replacing [SQL_CONNECTION_NAME] with the unique name you copied in a previous step.
+
+=>	export SQL_CONNECTION=[SQL_CONNECTION_NAME]
+
+7.	To verify that the environment variable is set, run:
+
+=>	echo $SQL_CONNECTION
+
+The connection name should be printed out.
+
+8.	To activate the proxy connection to your Cloud SQL database and send the process to the background, run the following command:
+
+=>	./cloud_sql_proxy -instances=$SQL_CONNECTION=tcp:3306 &
+
+The expected output is
+
+Listening on 127.0.0.1:3306 for [SQL_CONNECTION_NAME]
+Ready for new connections
+
+9.	Press ENTER.
+
+Task 3: Connect an application to the Cloud SQL instance
+
+In this task, you will connect a sample application to the Cloud SQL instance.
+
+1.	Configure the Wordpress application. To find the external IP address of your virtual machine, query its metadata:
+
+=>	curl -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip && echo
+
+2.	Go to the wordpress-europe-proxy external IP address in your browser and configure the Wordpress application.
+
+3.	Click Let's Go.
+
+4.	Specify the following, replacing [ROOT_PASSWORD] with the password you configured upon machine creation, and leave the remaining settings as their defaults:
+
+Property	Value
+Username	root
+Password	[ROOT_PASSWORD]
+Database Host	127.0.0.1
+
+You are using 127.0.0.1, localhost as the Database IP because the proxy you initiated listens on this address and redirects that traffic to your SQL server securely. 
+ 
+5.	Click Submit.
+
+6.	When a connection has been made, click Run the installation to instantiate Wordpress and its database in your Cloud SQL. This might take a few moments to complete.
+
+7.	Populate your demo site's information with random information and click Install Wordpress. You won't have to remember or use these details.
+
+Installing Wordpress might take up to 3 minutes, because it propagates all its data to your SQL Server. 
+
+8.	When a 'Success!' window appears, remove the text after the IP address in your web browser's address bar and press ENTER. You'll be presented with a working Wordpress Blog!
+ 
+Task 4: Connect to Cloud SQL via internal IP
+
+If you can host your application in the same region and VPC connected network as your Cloud SQL, you can leverage a more secure and performant configuration using Private IP.
+
+By using Private IP, you will increase performance by reducing latency and minimize the attack surface of your Cloud SQL instance because you can communicate with it exclusively over internal IPs.
+
+1.	In the cloud shell, run the following command to display details of the SQL instance, including its IP Address:
+
+=>	gcloud sql instances describe wordpress-db --zone us-central1-a
+
+2.	Note the Private IP address of the Cloud SQL server; it will be referred to as [SQL_PRIVATE_IP].
+
+3.	In the cloud shell, run the following command to display details of the wordpress-us-private-ip VM instance:
+
+=>	gcloud compute instances describe wordpress-us-private-ip --zone us-central1-a
+
+4.	Copy the external IP address of wordpress-us-private-ip, paste it in a browser window, and press ENTER.
+
+6.	Click Let's Go.
+
+7.	Specify the following, and leave the remaining settings as their defaults:
+
+Property	Value
+Username	root
+Password	type the [ROOT_PASSWORD] configured when the Cloud SQL instance was created
+Database Host	[SQL_PRIVATE_IP]
+
+8.	Click Submit.
+
+Notice that this time you are creating a direct connection to a Private IP, instead of configuring a proxy. That connection is private, which means that it doesn't egress to the internet and therefore benefits from better performance and security. 
+
+9.	Click Run the installation. An 'Already Installed!' window is displayed, which means that your application is connected to the Cloud SQL server over private IP.
+
+10.	In your web browser's address bar, remove the text after the IP address and press ENTER. You'll be presented with a working Wordpress Blog!

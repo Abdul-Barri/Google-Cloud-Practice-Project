@@ -1,0 +1,398 @@
+Creating Virtual Machines | Qwiklabs
+
+Overview
+In this lab, you will explore the Virtual Machine instance options and create several VMs with different characteristics.
+Objectives
+In this lab, you explore the available options for VMs and see the differences between locations.
+In this lab, you learn how to perform the following tasks:
+•	Create several standard VMs
+•	Create advanced VMs
+
+
+Task 1: Create a utility virtual machine
+
+Create a VM
+
+1.	In the Cloud Console, click on "Activate Cloud Shell". Alternatively, you can use the gcloud SDK terminal if you have it installed on your local machine. 
+
+2.	In the Cloud Shell Terminal, run the following command:
+
+=>	gcloud beta compute --project=qwiklabs-gcp-01-397a04c2779b instances create barraghan-standard-vm --zone=us-central1-c --machine-type=n1-standard-1 --subnet=default --no-address --image=debian-9-stretch-v20200805 --image-project=debian-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=barraghan-standard-vm
+
+This command will create a VM instance "barraghan-standard-vm" in the specified project "qwiklabs-gcp-01-397a04c2779b". The VM instance will be created in the "us-central1" region and "us-central1-c" zone. The VM machine type is "n1-standard-1 (1 vCPU, 3.75 GB memory)" and the default network and service account will be used. The image that will be used is the "debian-9-stretch-v20200805" with a boot disk sze of "10 GB".
+
+Explore the VM details
+
+1.	In the Cloud Shell,  run the following command to get details of the VM instance just created:
+
+=>	gcloud compute instances describe [NAME_OF_VM_INSTANCE] --zone [ZONE_OF_VM_INSTANCE]
+
+Remember to replace [NAME_OF_VM_INSTANCE] and [ZONE_OF_VM_INSTANCE] with the name of the VM insctance and the zone of the VM intance respectively. Example;
+
+=>	gcloud compute instances describe barraghan-standard-vm --zone us-central1-c
+
+This details of the VM instance will be returned. Example;
+
+cpuPlatform: Intel Haswell
+creationTimestamp: '2020-08-29T02:56:24.298-07:00'
+deletionProtection: false
+disks:
+- autoDelete: true
+  boot: true
+  deviceName: barraghan-standard-vm
+  diskSizeGb: '10'
+  guestOsFeatures:
+  - type: VIRTIO_SCSI_MULTIQUEUE
+  index: 0
+  interface: SCSI
+  kind: compute#attachedDisk
+  licenses:
+  - https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-9-stretch
+  mode: READ_WRITE
+  source: https://www.googleapis.com/compute/v1/projects/barraghan-demo-project/zones/us-central1-c/disks/barraghan-standard-vm
+  type: PERSISTENT
+fingerprint: VcmxCnD_Zkg=
+id: '5026410506544978088'
+kind: compute#instance
+labelFingerprint: 42WmSpB8rSM=
+machineType: https://www.googleapis.com/compute/v1/projects/barraghan-demo-project/zones/us-central1-c/machineTypes/n1-standard-1
+metadata:
+  fingerprint: 9GkV_E8s7lA=
+  kind: compute#metadata
+name: barraghan-standard-vm
+networkInterfaces:
+- fingerprint: aRrLj1w_lB4=
+  kind: compute#networkInterface
+  name: nic0
+  network: https://www.googleapis.com/compute/v1/projects/barraghan-demo-project/global/networks/default
+  networkIP: 10.128.0.8
+  subnetwork: https://www.googleapis.com/compute/v1/projects/barraghan-demo-project/regions/us-central1/subnetworks/default
+reservationAffinity:
+  consumeReservationType: ANY_RESERVATION
+scheduling:
+  automaticRestart: true
+  onHostMaintenance: MIGRATE
+  preemptible: false
+selfLink: https://www.googleapis.com/compute/v1/projects/barraghan-demo-project/zones/us-central1-c/instances/barraghan-standard-vm
+serviceAccounts:
+- email: 722823613512-compute@developer.gserviceaccount.com
+  scopes:
+  - https://www.googleapis.com/auth/devstorage.read_only
+  - https://www.googleapis.com/auth/logging.write
+  - https://www.googleapis.com/auth/monitoring.write
+  - https://www.googleapis.com/auth/service.management.readonly
+  - https://www.googleapis.com/auth/servicecontrol
+  - https://www.googleapis.com/auth/trace.append
+startRestricted: false
+status: RUNNING
+tags:
+  fingerprint: 42WmSpB8rSM=
+zone: https://www.googleapis.com/compute/v1/projects/barraghan-demo-project/zones/us-central1-c
+
+Explore the VM logs
+
+1.	Run the following command to return logs pertaining to the VM instance created:
+
+=>	gcloud beta logging read "resource.type=gce_instance"
+
+You should recieve a comprehensive description of the logs, like this;
+
+insertId: 1yi48ag2ot6n1n
+jsonPayload:
+  actor:
+    user: lawalabdulbarri@gmail.com
+  event_subtype: compute.instances.insert
+  event_timestamp_us: '1598694988980520'
+  event_type: GCE_OPERATION_DONE
+  operation:
+    id: '524522999167555751'
+    name: operation-1598694983200-5ae012e93f045-da464135-bdc7a8d1
+    type: operation
+    zone: us-central1-c
+  resource:
+    id: '5026410506544978088'
+    name: barraghan-standard-vm
+    type: instance
+    zone: us-central1-c
+  trace_id: operation-1598694983200-5ae012e93f045-da464135-bdc7a8d1
+  version: '1.2'
+labels:
+  compute.googleapis.com/resource_id: '5026410506544978088'
+  compute.googleapis.com/resource_name: barraghan-standard-vm
+  compute.googleapis.com/resource_type: instance
+  compute.googleapis.com/resource_zone: us-central1-c
+logName: projects/barraghan-demo-project/logs/compute.googleapis.com%2Factivity_log
+receiveTimestamp: '2020-08-29T09:56:29.013036837Z'
+resource:
+  labels:
+    instance_id: '5026410506544978088'
+    project_id: barraghan-demo-project
+    zone: us-central1-c
+  type: gce_instance
+severity: INFO
+timestamp: '2020-08-29T09:56:28.980520Z'
+---
+insertId: -dvcfxldkf30
+logName: projects/barraghan-demo-project/logs/cloudaudit.googleapis.com%2Factivity
+operation:
+  id: operation-1598694983200-5ae012e93f045-da464135-bdc7a8d1
+  last: true
+  producer: compute.googleapis.com
+protoPayload:
+  '@type': type.googleapis.com/google.cloud.audit.AuditLog
+  authenticationInfo:
+    principalEmail: lawalabdulbarri@gmail.com
+  methodName: beta.compute.instances.insert
+  request:
+    '@type': type.googleapis.com/compute.instances.insert
+  requestMetadata:
+    callerIp: 34.76.48.106
+    callerSuppliedUserAgent: google-cloud-sdk gcloud/306.0.0 command/gcloud.beta.compute.instances.create
+      invocation-id/7484d58383c64372ac2db2880962d849 environment/devshell environment-version/None
+      interactive/True from-script/False python/3.7.3 term/screen (Linux 4.19.112+),gzip(gfe)
+    destinationAttributes: {}
+    requestAttributes: {}
+  resourceName: projects/barraghan-demo-project/zones/us-central1-c/instances/barraghan-standard-vm
+  serviceName: compute.googleapis.com
+receiveTimestamp: '2020-08-29T09:56:29.156583585Z'
+resource:
+  labels:
+    instance_id: '5026410506544978088'
+    project_id: barraghan-demo-project
+    zone: us-central1-c
+  type: gce_instance
+severity: NOTICE
+timestamp: '2020-08-29T09:56:28.884Z'
+---
+insertId: 1kltirlg10tbghs
+jsonPayload:
+  actor:
+    user: lawalabdulbarri@gmail.com
+  event_subtype: compute.instances.insert
+  event_timestamp_us: '1598694984574070'
+  event_type: GCE_API_CALL
+  ip_address: ''
+  operation:
+    id: '524522999167555751'
+    name: operation-1598694983200-5ae012e93f045-da464135-bdc7a8d1
+    type: operation
+    zone: us-central1-c
+  request:
+    body: 'null'
+    url: https://compute.googleapis.com/compute/beta/projects/barraghan-demo-project/zones/us-central1-c/instances?alt=json
+  resource:
+    id: '5026410506544978088'
+    name: barraghan-standard-vm
+    type: instance
+    zone: us-central1-c
+  trace_id: operation-1598694983200-5ae012e93f045-da464135-bdc7a8d1
+  user_agent: google-cloud-sdk gcloud/306.0.0 command/gcloud.beta.compute.instances.create
+    invocation-id/7484d58383c64372ac2db2880962d849 environment/devshell environment-version/None
+    interactive/True from-script/False python/3.7.3 term/screen (Linux 4.19.112+),gzip(gfe)
+  version: '1.2'
+labels:
+  compute.googleapis.com/resource_id: '5026410506544978088'
+  compute.googleapis.com/resource_name: barraghan-standard-vm
+  compute.googleapis.com/resource_type: instance
+  compute.googleapis.com/resource_zone: us-central1-c
+logName: projects/barraghan-demo-project/logs/compute.googleapis.com%2Factivity_log
+receiveTimestamp: '2020-08-29T09:56:24.617766498Z'
+resource:
+  labels:
+    instance_id: '5026410506544978088'
+    project_id: barraghan-demo-project
+    zone: us-central1-c
+  type: gce_instance
+severity: INFO
+timestamp: '2020-08-29T09:56:24.574070Z'
+---
+insertId: sb4i34e55xlu
+logName: projects/barraghan-demo-project/logs/cloudaudit.googleapis.com%2Factivity
+operation:
+  first: true
+  id: operation-1598694983200-5ae012e93f045-da464135-bdc7a8d1
+  producer: compute.googleapis.com
+protoPayload:
+  '@type': type.googleapis.com/google.cloud.audit.AuditLog
+  authenticationInfo:
+    principalEmail: lawalabdulbarri@gmail.com
+  authorizationInfo:
+  - granted: true
+    permission: compute.instances.create
+    resourceAttributes:
+      name: projects/barraghan-demo-project/zones/us-central1-c/instances/barraghan-standard-vm
+      service: compute
+      type: compute.instances
+  - granted: true
+    permission: compute.disks.create
+    resourceAttributes:
+      name: projects/barraghan-demo-project/zones/us-central1-c/disks/barraghan-standard-vm
+      service: compute
+      type: compute.disks
+  - granted: true
+    permission: compute.subnetworks.use
+    resourceAttributes:
+      name: projects/barraghan-demo-project/regions/us-central1/subnetworks/default
+      service: compute
+      type: compute.subnetworks
+  - granted: true
+    permission: compute.instances.setMetadata
+    resourceAttributes:
+      name: projects/barraghan-demo-project/zones/us-central1-c/instances/barraghan-standard-vm
+      service: compute
+      type: compute.instances
+  - granted: true
+    permission: compute.instances.setServiceAccount
+    resourceAttributes:
+      name: projects/barraghan-demo-project/zones/us-central1-c/instances/barraghan-standard-vm
+      service: compute
+      type: compute.instances
+  methodName: beta.compute.instances.insert
+  request:
+    '@type': type.googleapis.com/compute.instances.insert
+    canIpForward: false
+    deletionProtection: false
+    disks:
+    - autoDelete: true
+      boot: true
+      deviceName: barraghan-standard-vm
+      initializeParams:
+        diskSizeGb: '10'
+        diskType: https://compute.googleapis.com/compute/beta/projects/barraghan-demo-project/zones/us-central1-c/diskTypes/pd-standard
+        sourceImage: https://compute.googleapis.com/compute/beta/projects/debian-cloud/global/images/debian-9-stretch-v20200805
+      mode: READ_WRITE
+      type: PERSISTENT
+    machineType: https://compute.googleapis.com/compute/beta/projects/barraghan-demo-project/zones/us-central1-c/machineTypes/n1-standard-1
+    name: barraghan-standard-vm
+    networkInterfaces:
+    - subnetwork: https://compute.googleapis.com/compute/beta/projects/barraghan-demo-project/regions/us-central1/subnetworks/default
+    reservationAffinity:
+      consumeReservationType: ANY_ALLOCATION
+    scheduling:
+      automaticRestart: true
+      onHostMaintenance: MIGRATE
+    serviceAccounts:
+    - email: 722823613512-compute@developer.gserviceaccount.com
+      scopes:
+      - https://www.googleapis.com/auth/devstorage.read_only
+      - https://www.googleapis.com/auth/logging.write
+      - https://www.googleapis.com/auth/monitoring.write
+      - https://www.googleapis.com/auth/service.management.readonly
+      - https://www.googleapis.com/auth/servicecontrol
+      - https://www.googleapis.com/auth/trace.append
+  requestMetadata:
+    callerIp: 34.76.48.106
+    callerSuppliedUserAgent: google-cloud-sdk gcloud/306.0.0 command/gcloud.beta.compute.instances.create
+      invocation-id/7484d58383c64372ac2db2880962d849 environment/devshell environment-version/None
+      interactive/True from-script/False python/3.7.3 term/screen (Linux 4.19.112+),gzip(gfe)
+    destinationAttributes: {}
+    requestAttributes:
+      auth: {}
+      time: '2020-08-29T09:56:24.612Z'
+  resourceLocation:
+    currentLocations:
+    - us-central1-c
+  resourceName: projects/barraghan-demo-project/zones/us-central1-c/instances/barraghan-standard-vm
+  response:
+    '@type': type.googleapis.com/operation
+    id: '524522999167555751'
+    insertTime: '2020-08-29T02:56:24.429-07:00'
+    name: operation-1598694983200-5ae012e93f045-da464135-bdc7a8d1
+    operationType: insert
+    progress: '0'
+    selfLink: https://www.googleapis.com/compute/beta/projects/barraghan-demo-project/zones/us-central1-c/operations/operation-1598694983200-5ae012e93f045-da464135-bdc7
+a8d1
+    selfLinkWithId: https://www.googleapis.com/compute/beta/projects/barraghan-demo-project/zones/us-central1-c/operations/524522999167555751
+    startTime: '2020-08-29T02:56:24.432-07:00'
+    status: RUNNING
+    targetId: '5026410506544978088'
+    targetLink: https://www.googleapis.com/compute/beta/projects/barraghan-demo-project/zones/us-central1-c/instances/barraghan-standard-vm
+    user: lawalabdulbarri@gmail.com
+    zone: https://www.googleapis.com/compute/beta/projects/barraghan-demo-project/zones/us-central1-c
+  serviceName: compute.googleapis.com
+receiveTimestamp: '2020-08-29T09:56:25.614497038Z'
+resource:
+  labels:
+    instance_id: '5026410506544978088'
+    project_id: barraghan-demo-project
+    zone: us-central1-c
+  type: gce_instance
+severity: NOTICE
+timestamp: '2020-08-29T09:56:23.451Z'
+
+Task 2: Create a Windows virtual machine
+
+Create a VM
+
+1.	In the Cloud Console, click on "Activate Cloud Shell". Alternatively, you can use the gcloud SDK terminal if you have it installed on your local machine. 
+
+2.	In the Cloud Shell Terminal, run the following commands:
+
+=>	gcloud beta compute --project=qwiklabs-gcp-01-397a04c2779b instances create barraghan-window-vm --zone=europe-west2-a --machine-type=n1-standard-2 --subnet=default --tags=http-server,https-server --image=windows-server-2016-dc-core-v20200813 --image-project=windows-cloud --boot-disk-size=100GB --boot-disk-type=pd-standard --boot-disk-device-name=barraghan-window-vm --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring 
+
+This command will create a VM instance "barraghan-window-vm" in the specified project "qwiklabs-gcp-01-397a04c2779b". The VM instance will be created in the "europe-west2" region and "europe-west2-a" zone. The VM machine type is "n1-standard-2 (2 vCPU, 7.5 GB memory)" and the default network and service account will be used. The image that will be used is the "windows-server-2016-dc-core-v20200813" with a boot disk sze of "100 GB".
+
+=>	gcloud compute --project=qwiklabs-gcp-01-397a04c2779b firewall-rules create default-allow-http --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:80 --source-ranges=0.0.0.0/0 --target-tags=http-server
+
+The above command creates a "default-allow-http" firewall rule on the default network in the project "qwiklabs-gcp-01-397a04c2779b", with the direction "Ingress" and "allow" action. The priority is set to "1000" and it applied to resources with the target tag "http-server"
+
+=>	gcloud compute --project=qwiklabs-gcp-01-397a04c2779b firewall-rules create default-allow-https --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:443 --source-ranges=0.0.0.0/0 --target-tags=https-server
+
+The above command creates a "default-allow-https" firewall rule on the default network in the project "qwiklabs-gcp-01-397a04c2779b", with the direction "Ingress" and "allow" action. The priority is set to "1000" and it applied to resources with the target tag "https-server"
+
+
+Set the password for the VM
+
+1.	In the Cloud Shell, run the following command to set password for this Windows VM, so as to enable you log into the VM:
+
+=>	gcloud compute reset-windows-password [NAME_OF_WINDOWS_VM_INSTANCE] --zone [ZONE_OF_WINDOWS_VM_INSTANCE]
+
+Remember to replace [NAME_OF_WINDOWS_VM_INSTANCE] with the name of the Windows VM instance and [ZONE_OF_WINDOWS_VM_INSTANCE] with the zone of the VM instance. Example;
+
+=>	gcloud compute reset-windows-password barraghan-window-vm --zone europe-west2-a
+
+2.	You will be presented with a confirmation prompt; this will need to be accepted by entering Y and/or pressing Enter. It can be rejected by entering N, then pressing Enter. 
+
+3.	Copy the provided password.
+
+Task 3: Create a custom virtual machine
+
+Create a VM
+
+1.	In the Cloud Console, click on "Activate Cloud Shell". Alternatively, you can use the gcloud SDK terminal if you have it installed on your local machine. 
+
+2.	In the Cloud Shell Terminal, run the following command:
+
+=>	gcloud beta compute --project=qwiklabs-gcp-01-397a04c2779b instances create barraghan-custom-vm --zone=us-west1-b --machine-type=custom-6-32768 --subnet=default --network-tier=PREMIUM --image=debian-9-stretch-v20200805 --image-project=debian-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=barraghan-custom-vm 
+
+This command will create a VM instance "barraghan-custom-vm" in the specified project "qwiklabs-gcp-01-397a04c2779b". The VM instance will be created in the "us-west1" region and "us-west1-b" zone. The VM machine type is "custom (6 vCPU, 32 GB memory)" and the default network and service account will be used. The image that will be used is the "debian-9-stretch-v20200805" with a boot disk sze of "10 GB".
+
+Connect via SSH to your custom VM
+
+1.	To SSH into the Custom VM you just created, run the following command in cloud shell: 
+
+=>	gcloud compute ssh [NAME_OF_CUSTOM_VM] --zone [ZONE_OF_CUSTOM_VM]
+
+Remember to replace [NAME_OF_CUSTOM_VM] with the name of the custom VM and [ZONE_OF_CUSTOM_VM] with the zone of the Custom VM. Example;
+
+=>	gcloud compute ssh barraghan-custom-vm --zone us-west1-b
+
+2.	To see information about unused and used memory and swap space on your custom VM, run the following command:
+
+=>	free
+
+3.	To see details about the RAM installed on your VM, run the following command:
+
+=>	sudo dmidecode -t 17
+
+4.	To verify the number of processors, run the following command:
+
+=>	nproc
+
+5.	To see details about the CPUs installed on your VM, run the following command:
+
+=>	lscpu
+
+6.	To exit the SSH terminal, run the following command:
+
+=>	exit
