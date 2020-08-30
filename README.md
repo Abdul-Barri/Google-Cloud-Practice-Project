@@ -6,4 +6,3 @@ Task-1: This contains the screenshots of the 15 completed Qwiklabs email notific
 
 Task-2: This contains the translated qwiklabs console instructions. The instructions were remade into Command-line instructions. 
 
-For enquiries, contact author - lawalabdulbarri@gmail.com
